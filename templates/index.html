@@ -1,0 +1,171 @@
+{% extends "layout.html" %}
+{% block body %}
+<script type="text/javascript">
+  jQuery.fn.extend({
+    disable: function(state) {
+        return this.each(function() {
+            this.disabled = state;
+        });
+    }
+  });
+
+  $(function() {
+    var press_btn = function(e) {
+      $.getJSON($SCRIPT_ROOT + '/press_btn', {
+        switch: e.data.switch,
+        cmd: e.data.cmd
+      }, function(data) {
+        //$('#result').text(data.state);
+        update_state(data);
+        //console.log(data);
+      });
+      return false;
+    };
+
+    //$('button#switch_on').bind('click', {swithc: 'ss', cmd: 'switch_on'}, press_btn);
+    //$('button#switch_off').bind('click', {cmd: 'switch_off'} ,press_btn);
+
+    var get_states = function(e) {
+      $.getJSON($SCRIPT_ROOT + '/get_states', {
+        switches: 'all'
+      }, function(data) {
+        console.log(data.states);
+        $("#loader").hide();  
+        var items = [];
+        $.each(data.states, function (key, val) {
+          //items.push("<li id='" + key + "'>" + val + "</li>");
+          var card = $("<div>", { class: "card text-center" });
+          var card_body = $("<div>", { class: "card-body" });
+          var card_title = $("<h4>", { class: "card-title", html: key });
+          var button_on = $("<button>", { type: "button", class: "btn btn-success btn-lg", id: key + "_on", html: "ON" });
+          var button_off = $("<button>", { type: "button", class: "btn btn-danger btn-lg", id: key + "_off", html: "OFF" });
+          button_on.bind('click', {switch: key, cmd: 'switch_on'}, press_btn);
+          button_off.bind('click', {switch: key, cmd: 'switch_off'}, press_btn);
+          if (val == 'on') {
+            button_on.disable(true);
+            button_off.disable(false);
+          }
+          else if (val == 'off') {
+            button_on.disable(false);
+            button_off.disable(true);
+          }
+          card_body.append(card_title);
+          card_body.append(button_on);
+          card_body.append(button_off);
+          card.append(card_body);
+          
+          //$(".container").append(card);
+          if (key.endsWith('-at-PLAYROOM')) {
+            $("#playroom").append(card);
+          }
+          else if (key.endsWith('-at-KITCHEN')) {
+            $("#kitchen").append(card);
+          }
+          else if (key.endsWith('-at-BEDROOM')) {
+            $("#bedroom").append(card);
+          }
+          else if (key.endsWith('-at-RESTROOM')) {
+            $("#restroom").append(card);
+          }
+          else if (key.endsWith('-at-HALL')) {
+            $("#hall").append(card);
+          }
+          else {
+            $("#default").append(card);
+          }
+
+        });
+
+      });
+      return false;
+    };
+
+    var update_state = function(data) {
+      console.log(data.switch, data.state);
+      if (data.state == 'on') {
+        $('#' + data.switch + '_on').disable(true);
+        $('#' + data.switch + '_off').disable(false);
+      }
+      else if (data.state == 'off') {
+        $('#' + data.switch + '_on').disable(false);
+        $('#' + data.switch + '_off').disable(true); 
+      };
+    };
+
+    get_states();
+
+  });
+</script>
+
+<div class="container">
+  <!-- Content here -->
+
+
+  <h1>homebridge-web-ui</h1>
+
+
+
+  <div id="loader">
+    <div class="dot"></div>
+    <div class="" lass="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="lading"></div>
+  </div> 
+
+  <ul id="rooms-nav" class="nav nav-tabs" role="tablist">
+    
+    <li class="nav-item">
+    <a class="nav-link active" href="#default" id="default-tab" role="tab" data-toggle="tab" aria-controls="default" aria-expanded="true">Default</a>
+    </li>
+
+    <li class="nav-item">
+    <a class="nav-link" href="#playroom" role="tab" id="playroom-tab" data-toggle="tab" aria-controls="playroom">Playroom</a>
+    </li>
+
+    <li class="nav-item">
+    <a class="nav-link" href="#kitchen" role="tab" id="kitcher-tab" data-toggle="tab" aria-controls="kitchen">Kitchen</a>
+    </li>
+
+    <li class="nav-item">
+    <a class="nav-link" href="#bedroom" role="tab" id="bedroom-tab" data-toggle="tab" aria-controls="bedroom">Bedroom</a>
+    </li>
+
+    <li class="nav-item">
+    <a class="nav-link" href="#restroom" role="tab" id="restroom-tab" data-toggle="tab" aria-controls="restroom">Restroom</a>
+    </li>
+
+    <li class="nav-item">
+    <a class="nav-link" href="#hall" role="tab" id="hall-tab" data-toggle="tab" aria-controls="hall">Hall</a>
+    </li>
+  </ul>
+
+  <!-- Content Panel -->
+  <div id="rooms-nav-content" class="tab-content">
+
+    <div role="tabpanel" class="tab-pane fade show active" id="default" aria-labelledby="default-tab">
+    </div>
+
+    <div role="tabpanel" class="tab-pane fade" id="playroom" aria-labelledby="playroom-tab">
+    </div>
+
+    <div role="tabpanel" class="tab-pane fade" id="kitchen" aria-labelledby="kitchen-tab">
+    </div>
+
+    <div role="tabpanel" class="tab-pane fade" id="bedroom" aria-labelledby="bedroom-tab">
+    </div>
+
+    <div role="tabpanel" class="tab-pane fade" id="restroom" aria-labelledby="restroom-tab">
+    </div>
+
+    <div role="tabpanel" class="tab-pane fade" id="hall" aria-labelledby="hall-tab">
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}
